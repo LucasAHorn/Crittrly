@@ -1,1 +1,0 @@
-### TODO - describe the goal of project, then how to init and run
