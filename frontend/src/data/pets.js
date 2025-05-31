@@ -5,7 +5,7 @@ export const pets = [
     age: '2 years',
     type: 'Dog',
     breed: 'Labrador',
-    location: 'Des Moines, IA',
+    location: 'Saint Charles, IL',
     image: '',
     description: 'Friendly and energetic. Great with kids!',
   },
