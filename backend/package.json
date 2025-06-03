@@ -1,21 +1,21 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "This folder contains the Node.js backend built with Express.",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "mysql2": "^3.14.1",
     "nodemon": "^3.1.10"
-
-     
   }
 }
