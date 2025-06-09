@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const db = require('../config/db');
 
 //GET requests to '/api/resources' and returns all entries in the resources table.
 router.get('/', (req, res) => {

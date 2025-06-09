@@ -1,45 +1,60 @@
-const { DataTypes } = require('sequalize');
-const sequelize = require('../config/db');
+const db = require('../config/db');
 
-const AdoptionPost = sequelize.define('AdoptionPost', {
-    petName: {
-        type: DataTypes.STRING,
-        allowNull: false
+const AdoptionPost = {
+    createTableIfNotExists: () =>{
+        const sql = `
+        CREATE TABLE IF NOT EXISTS AdoptionPosts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            petName  VARCHAR(255) NOT NULL,
+            species VARCHAR(255) NOT NULL,
+            breed VARCHAR(255) NOT NULL,
+            age INT NOT NULL,
+            gender ENUM('Male', 'Female') NOT NULL,
+            reasonForAdoption TEXT,
+            location VARCHAR(255) NOT NULL,
+            photoURL VARCHAR(255) NOT NULL,
+            userID INT NOT NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            udpatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )`;
+        db.query(sql, (err) => {
+            if (err) console.error('Error creating AdoptionPost table:', err);
+            else console.log('AdoptionPosts table ready');
+        });
     },
-    species: {
-        type: DataTypes.STRING,
-        allowNull: false
+    getAll: (callback) => {
+        db.query('SELECT * FROM AdoptionPosts', callback);
     },
-    breed: {
-        type: DataTypes.STRING,
-        allowNull: false
+
+    getById: (id, callback) => {
+        db.query('SELECT * FROM AdoptionPosts WHERE id = ?', [id], callback);
     },
-    age: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+
+    create: (post, callback) =>{
+        const {
+            petName,
+            species,
+            breed,
+            age,
+            gender,
+            reasonForAdoption,
+            location,
+            photoURL,
+            userID
+        } = post;
+
+        const sql = `
+            INSERT INTO AdoptionPosts
+            (petName, species, breed, age, gender, reasonForAdoption, location, photoURL, userID)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(sql, [petName, species, breed, age, gender, reasonForAdoption, location, photoURL, userID], callback);
     },
-    gender: {
-        type: DataTypes.ENUM('Male', "Female"),
-        allowNull: true
-    },
-    reasonForAdoption:{
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    location: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    photoURL: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    userID: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+
+    delete: (id, callback) => {
+        db.query('DELETE FROM AdoptionPosts WHERE id = ?'[id], callback);
     }
-},{
-    timestamps: true
-});
+};
 
 module.exports = AdoptionPost;
