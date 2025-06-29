@@ -3,47 +3,62 @@ const router = express.Router();
 const db = require('../config/db');
 
 //GET all forum topics
-router.get('/topics', (req, res) =>{
-    const sql = 'SELECT * FROM forum_topics ORDER BY created_at DESC';
-    db.query(sql, (err, results) =>{
-        if (err) return res.status(500).json({ error: err.message });
+router.get('/topics', async (req, res) =>{
+    try{
+        const [results] = await db.query('SELECT * FROM forum_topics ORDER BY created_at DESC');
         res.json(results);
-    });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch topics', details: err.message });
+    }
 });
 
 //CREATE a new topic
-router.post('/topics', (req, res) =>{
+router.post('/topics', async (req, res) =>{
     const{ title }=req.body;
     if (!title) return res.status(400).json({ error: "Title is required."});
 
-    const sql = 'INSERT INTO forum_topics (title) VALUES (?)';
-    db.query(sql, [title], (err, result) =>{
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: result.insertId, title });
-    });
+    try {
+        const [result] = await db.query('INSERT INTO forum_topics (title) VALUES (?)', [title]);
+        res.json({ id: result.insertId, title});
+    } catch(err){
+        res.status(500).json({error: 'Failed to create topic', details: err.message });
+    }
 });
 
 //GET posts for a topic
-router.get('/topics/:topicId/posts', (req, res) =>{
+router.get('/topics/:topicId/posts', async (req, res) =>{
     const topicId = req.params.topicId;
-    const sql = 'SELECT * FROM forum_posts WHERE topic_id = ? ORDER BY created_at ASC';
-    db.query(sql,[topicId], (err, results) =>{
-        if (err) return res.status(500).json({ error: err.message });
+    try{
+        const [results] = await db.query(
+            'SELECT * FROM forum_posts WHERE topic_id = ? ORDER BY created_at ASC', 
+            [topicId]
+        );
         res.json(results);
-    });
+    } catch (err){
+        res.status(500).json({ error: 'Failed to fetch posts', details: err.message});
+    }
 });
 
 //ADD a post to a topic
-router.post('/topics/:topicId/posts', (req,res) =>{
+router.post('/topics/:topicId/posts', async (req,res) =>{
     const topicId = req.params.topicId;
     const { author, content } = req.body;
     if (!content) return res.status(400).json({ error: "Content is required."});
 
-    const sql = 'INSERT INTO forums_posts (topic_id, author, content) VALUES (?, ?, ?)';
-    db.query(sql, [topic_id, author || 'Anonymous', content], (err, result) =>{
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: result.insertId, topic_id: topicId, author, content });
-    });
+    try {
+        const [results] = await db.query(
+            'INSERT INTO forums_posts (topic_id, author, content) VALUES (?, ?, ?)',
+            [topicId, author || 'Anonymous', content]
+        );
+        res.json({
+            id: result.insertId,
+            topic_id: topicId,
+            author: author || 'Anonymous',
+            content,
+        });
+    } catch (err){
+        res.status(500).json({ error: 'Failed to add post', details: err.message});
+    }
 });
 
 module.exports = router;

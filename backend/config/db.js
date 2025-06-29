@@ -5,13 +5,6 @@ const db = mysql.createConnection({
     user: 'crittrly',
     password: 'Test123!',
     database: 'crittrly_db'
-});
+}).promise();
 
-db.connect((err) => {
-    if (err){
-        console.error('Database connection failed: ', err.stack);
-        return;
-    }
-    console.log('Connected to databse');
-});
 module.exports = db;

@@ -1,31 +1,30 @@
 const db = require('../config/db');
 
-exports.getAllAdoptionPosts = (req, res) =>{
-    const sql = 'SELECT * FROM AdoptionPosts';
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('Failed to retrieve adoption posts', err);
-            return res.status(500).json({ error: 'Failed to retrieve adoption posts.'});
-        }
+exports.getAllAdoptionPosts = async (req, res) =>{
+    try{
+        const [results] = await db.query('SELECT * FROM AdoptionPosts');
         res.json(results);
-    });
+    } catch(err){
+        console.error('Failed to retrieve adoption posts:', err);
+        res.status(500).json({ error: 'Failed to retrieve adoption posts.'});
+    }
 };
 
-exports.getAdoptionPostById = (req, res) => {
-    const sql = 'SELECT * FROM AdoptionPosts WHERE id = ?';
-    const id = req.params.id;
-
-    db.query(sql, [id], (err, results) => {
-        if(err){
-            console.error('Failed to retreive adoption post: ', err);
-            return res.status(500).json({error: 'Post not found.'});
+exports.getAdoptionPostById = async (req, res) => {
+    const post_id = req.params.id;
+    try{
+        const [results] = await db.query('SELECT * FROM AdoptionPosts WHERE id = ?', [post_id]);
+        if (results.length === 0){
+            return res.status(404).json({ error: 'Post not found. '});
         }
         res.json(results[0]);
-    });
+    } catch (err){
+        console.error('Failed to retrieve adption post: ', err);
+        res.status(500).json({ error: 'Failed to retrieve post.'});
+    }
 };
 
-exports.createAdoptionPost = (req, res) => {
+exports.createAdoptionPost = async (req, res) => {
     const {
         petName, species, breed, age, gender, description,
         reasonForAdoption, location, userID
@@ -39,27 +38,25 @@ exports.createAdoptionPost = (req, res) => {
 
     const values = [petName, species, breed, age, gender, description, reasonForAdoption, location, userID, photoURL];
 
-    db.query(sql, values, (err, result) => {
-        if (err) {
-            console.error('Failed to create adoption post:', err);
-            return res.status(500).json({ error: 'Failed to create adoption post.' });
-        }
-        res.status(201).json({ id: result.insertId, ...req.body, photoURL });
-    });
+    try{
+        const [result] = await db.query(sql, values);
+        res.status(201).json({ id: result.insertId, ...req.body, photoURL});
+    } catch (err){
+        console.error('Failed to create adoption post:', err);
+        res.status(500).json({ error: 'Failed to create adoption post.'});
+    }
 };
 
-exports.deleteAdoptionPost = (req, res) => {
-    const sql = 'DELETE FROM AdoptionPosts WHERE id = ?';
+exports.deleteAdoptionPost = async (req, res) => {
     const id = req.params.id;
-
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error('Failed to delete post:', err);
-            return res.status(500).json({ error: 'Failed to delete post.' });
+    try{
+        const[result] = await db.query('DELETE FROM AdoptionPosts WHERE id = ?', [id]);
+        if (result.affectedRows === 0){
+            return res.status(404).json({ error: 'Post not found.'});
         }
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-        res.json({ message: 'Post deleted' });
-    });
+        res.json({ message: 'Post deleted'});
+    } catch (err){
+        console.error('Failed to delete post: ', err);
+        res.status(500).json({ error: 'Failed to delete post.'});
+    }
 };
