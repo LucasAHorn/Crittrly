@@ -5,8 +5,8 @@ getAll: (callback) => {
         db.query('SELECT * FROM AdoptionPosts', callback);
     },
 
-    getById: (id, callback) => {
-        db.query('SELECT * FROM AdoptionPosts WHERE post_id = ?', [post_id], callback);
+    getById: (adoption_post_id, callback) => {
+        db.query('SELECT * FROM AdoptionPosts WHERE adoption_post_id = ?', [adoption_post_id], callback);
     },
 
     create: (post, callback) =>{
@@ -31,8 +31,8 @@ getAll: (callback) => {
         db.query(sql, [petName, species, breed, age, gender, reasonForAdoption, location, photoURL, userID], callback);
     },
 
-    delete: (post_id, callback) => {
-        db.query('DELETE FROM AdoptionPosts WHERE post_id = ?'[post_id], callback);
+    delete: (adoption_post_id, callback) => {
+        db.query('DELETE FROM AdoptionPosts WHERE adoption_post_id = ?'[adoption_post_id], callback);
     }
 };
 

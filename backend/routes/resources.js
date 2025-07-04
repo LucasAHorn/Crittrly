@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
+console.log("resources.js active");
+
 //GET requests to '/api/resources' and returns all entries in the resources table.
 router.get('/', async (req, res) => {
     try{
@@ -23,7 +25,8 @@ router.get('/', async (req, res) => {
 router.post('/', async (req,res) =>{
     try{
         const { title, description, link, category } = req.body;
-        const sql = 'INSERT INTO resources  (title, description, link, category) VALUES (?.?.?.?)';
+        const sql = 'INSERT INTO resources (title, description, link, category) VALUES (?, ?, ?, ?)';
+
         const [result] = await db.query(sql, [title, description, link, category]);
         res.json({ id: result.insertId, ...req.body});
     } catch (err){
@@ -32,9 +35,9 @@ router.post('/', async (req,res) =>{
 });
     
 //DELETE a resource
-router.delete('/:resource_id', async (req, res) =>{
+router.delete('/:id', async (req, res) =>{
     try{
-        await db.query('DELETE FROM resources WHERE resource_id = ?', [req.params.resource_id]);
+        await db.query('DELETE FROM resources WHERE id = ?', [req.params.id]);
         res.json({ message: 'Resource deleted successfully' });
     } catch(err){
         res.status(500).json({ error: 'Failed to delete resource', details: err });
@@ -42,7 +45,7 @@ router.delete('/:resource_id', async (req, res) =>{
 });
 
 //PUT(UPDATE) a resource
-router.put('/:resource_id', async (req, res) =>{
+router.put('/:id', async (req, res) =>{
     try{
         const {title, description, link, category} = req.body;
         const sql = 'UPDATE resources SET title = ?, description = ?, link = ?, category = ? WHERE id = ?';

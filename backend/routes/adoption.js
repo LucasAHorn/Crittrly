@@ -1,8 +1,4 @@
-// import express from 'express';
-// import multer from 'multer';
-// import adoptionController from '../controllers/adoptionController';
-
-
+const db = require('../config/db');
 const express = require('express');
 const multer = require('multer');
 const adoptionController = require('../controllers/adoptionController.js');

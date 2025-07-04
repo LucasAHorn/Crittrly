@@ -2,21 +2,27 @@
 // Just note that the example backend is not using 'await' therefore not using multi threading
 
 // we should aim to use multi threading
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const mysql = require("mysql2");
 const path = require('path');
-
-const db = require('./config/db');
 
 const resourceRouter = require('./routes/resources');
 const forumRouter = require('./routes/forum');
 const adoptionRouter = require('./routes/adoption');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const host = "localhost";
+const PORT = 8080;
+
+//MYSQL connection pool
+const db = mysql.createPool({
+    host: "localhost",
+    user:"crittrly",
+    password: "Test123!",
+    database: "crittrly_db"
+}).promise();
+
 
 app.use(cors()); //allows frontend on different port to connect
 app.use(express.json());
@@ -27,19 +33,17 @@ app.use('/api/resources', resourceRouter); //all routes starting with /api/resou
 app.use('/api/forum', forumRouter);
 app.use('/adoption-posts', adoptionRouter);
 
+module.exports.db = db;
 
-const startServer = () => {
-    db.connect((err) => {
-        if (err) {
-            console.error('Failed to connect to DB', err);
-            process.exit(1);
-        } else {
-        console.log('Connected to DB');
-        app.listen(PORT, () =>{
-            console.log(`Server running on http://localhost:${PORT}`);
-        });
-    }
-    });
-};
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
 
-startServer();
+db.getConnection()
+  .then(conn => {
+    console.log('Connected to MySQL!');
+    conn.release();  // release back to pool
+  })
+  .catch(err => {
+    console.error('MySQL connection error:', err);
+  });

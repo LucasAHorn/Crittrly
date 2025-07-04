@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
+console.log("forum.js active");
+
 //GET all forum topics
 router.get('/topics', async (req, res) =>{
     try{
@@ -29,7 +31,7 @@ router.post('/topics', async (req, res) =>{
 router.get('/topics/:topicId/posts', async (req, res) =>{
     const topicId = req.params.topicId;
     try{
-        const [results] = await db.query(
+        const [result] = await db.query(
             'SELECT * FROM forum_posts WHERE topic_id = ? ORDER BY created_at ASC', 
             [topicId]
         );
@@ -46,10 +48,11 @@ router.post('/topics/:topicId/posts', async (req,res) =>{
     if (!content) return res.status(400).json({ error: "Content is required."});
 
     try {
-        const [results] = await db.query(
-            'INSERT INTO forums_posts (topic_id, author, content) VALUES (?, ?, ?)',
+        const [result] = await db.query(
+            'INSERT INTO forum_posts (topic_id, author, content) VALUES (?, ?, ?)',
             [topicId, author || 'Anonymous', content]
         );
+        console.log('Inserted post id:', result.insertId);
         res.json({
             id: result.insertId,
             topic_id: topicId,

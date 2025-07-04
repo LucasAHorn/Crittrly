@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 exports.getAllAdoptionPosts = async (req, res) =>{
     try{
-        const [results] = await db.query('SELECT * FROM AdoptionPosts');
+        const [results] = await db.query('SELECT * FROM adoption_posts');
         res.json(results);
     } catch(err){
         console.error('Failed to retrieve adoption posts:', err);
@@ -11,15 +11,15 @@ exports.getAllAdoptionPosts = async (req, res) =>{
 };
 
 exports.getAdoptionPostById = async (req, res) => {
-    const post_id = req.params.id;
+    const id = req.params.id;
     try{
-        const [results] = await db.query('SELECT * FROM AdoptionPosts WHERE id = ?', [post_id]);
+        const [results] = await db.query('SELECT * FROM adoption_posts WHERE id = ?', [id]);
         if (results.length === 0){
             return res.status(404).json({ error: 'Post not found. '});
         }
         res.json(results[0]);
     } catch (err){
-        console.error('Failed to retrieve adption post: ', err);
+        console.error('Failed to retrieve adoption post: ', err);
         res.status(500).json({ error: 'Failed to retrieve post.'});
     }
 };
@@ -32,7 +32,7 @@ exports.createAdoptionPost = async (req, res) => {
 
     const photoURL = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const sql = `INSERT INTO AdoptionPosts 
+    const sql = `INSERT INTO adoption_posts
       (petName, species, breed, age, gender, description, reasonForAdoption, location, userID, photoURL)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
@@ -41,16 +41,16 @@ exports.createAdoptionPost = async (req, res) => {
     try{
         const [result] = await db.query(sql, values);
         res.status(201).json({ id: result.insertId, ...req.body, photoURL});
-    } catch (err){
-        console.error('Failed to create adoption post:', err);
-        res.status(500).json({ error: 'Failed to create adoption post.'});
+    } catch (err) {
+  console.error('Failed to create adoption post:', err);
+    res.status(500).json({ error: 'Failed to create adoption post.', details: err.message });
     }
 };
 
 exports.deleteAdoptionPost = async (req, res) => {
     const id = req.params.id;
     try{
-        const[result] = await db.query('DELETE FROM AdoptionPosts WHERE id = ?', [id]);
+        const [result] = await db.query('DELETE FROM adoption_posts WHERE id = ?', [id]);
         if (result.affectedRows === 0){
             return res.status(404).json({ error: 'Post not found.'});
         }
